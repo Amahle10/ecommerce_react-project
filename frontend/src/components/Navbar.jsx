@@ -1,7 +1,6 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import "../style.css"; // 👈 import CSS
 
 export default function Navbar() {
   const { user, logout } = useContext(AuthContext);
@@ -9,7 +8,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="links">
-        <Link to="/">ApiTest2</Link>
+        <Link to="/">ApiTest</Link>
         <Link to="/products">Products</Link>
         {user && <Link to="/orders">Orders</Link>}
         <Link to="/cart">Cart</Link>

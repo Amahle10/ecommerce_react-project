@@ -1,12 +1,12 @@
 import { useEffect, useState, useContext } from "react";
 import API from "../api/axios";
-import { CartContext } from "../context/CartContext"; // 👈 import cart context
+import { CartContext } from "../context/CartContext";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const { addToCart } = useContext(CartContext); // 👈 access addToCart function
+  const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -27,21 +27,26 @@ export default function Products() {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="p-5">
-      <h2 className="text-xl font-bold mb-4">Products</h2>
-      <div className="grid grid-cols-3 gap-5">
+    <div className="page">
+      <h2>Products</h2>
+      <div className="products-grid">
         {products.map((product) => (
-          <div key={product._id} className="border p-3 rounded">
-            <h3 className="font-semibold">{product.name}</h3>
-            <p>Price: ${product.price}</p>
-            <p>{product.description}</p>
-            {/* ✅ Add to Cart Button */}
-            <button
-              onClick={() => addToCart(product)}
-              className="mt-2 bg-green-500 text-white px-3 py-1 rounded"
-            >
-              Add to Cart
-            </button>
+          <div key={product._id} className="product-card">
+            {/* Product Image */}
+            {product.image ? (
+              <img
+                src={`http://localhost:5000${product.image}`}
+                alt={product.name}
+              />
+            ) : (
+              <div className="product-placeholder">No Image</div>
+            )}
+
+            <h3>{product.name}</h3>
+            <p className="price">${product.price}</p>
+            <p className="description">{product.description}</p>
+
+            <button onClick={() => addToCart(product)}>Add to Cart</button>
           </div>
         ))}
       </div>

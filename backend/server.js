@@ -12,7 +12,7 @@ import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import webhookRoutes from "./routes/webhookRoutes.js";
-
+import path from "path";
 
 const app = express();
 app.use(express.json());
@@ -30,6 +30,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use("/api/webhook", webhookRoutes);
+app.use("/uploads", express.static(path.join(path.resolve(), "uploads")));
 
 app.get('/', (req, res) => res.send('API running'));
 
