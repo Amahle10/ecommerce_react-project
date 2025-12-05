@@ -1,0 +1,56 @@
+/* Navbar styles */
+.navbar {
+  background-color: #1f2937; /* dark gray */
+  color: white;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: Arial, sans-serif;
+}
+
+.navbar .links a {
+  margin-right: 16px;
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+}
+
+.navbar .links a:hover {
+  color: #3b82f6; /* blue */
+}
+
+.navbar .user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar .user button {
+  background-color: #dc2626; /* red */
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.navbar .user button:hover {
+  background-color: #b91c1c;
+}
+
+/* General page styles */
+.page {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.page h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.page p {
+  font-size: 16px;
+  margin-top: 5px;
+}
