@@ -3,12 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import { loadStripe } from "@stripe/stripe-js";
-import {
-  Elements,
-  CardElement,
-  useStripe,
-  useElements,
-} from "@stripe/react-stripe-js";
+import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import API from "../api/axios";
 
 // Load Stripe
@@ -19,46 +14,36 @@ function Checkout() {
   const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
 
-  const totalAmount = cartItems.reduce(
-    (acc, item) => acc + item.price * item.qty,
-    0
-  );
+  const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
 
   const handlePayment = async (e) => {
     e.preventDefault();
     if (!stripe || !elements) return;
 
-    if (!user) {
-      setError("❌ You must be logged in to checkout.");
-      return;
-    }
-
-    if (cartItems.length === 0) {
-      setError("❌ Your cart is empty.");
-      return;
-    }
+    if (!user) return setError("❌ You must be logged in to checkout.");
+    if (cartItems.length === 0) return setError("❌ Your cart is empty.");
 
     try {
       setLoading(true);
       setError("");
+      setSuccess("");
 
-      // 1️⃣ Create new order in backend
+      // 1️⃣ Create order
       const orderRes = await API.post("/orders", {
-      orderItems: cartItems.map((item) => ({
-        product: item._id,
-            name: item.name,         // include product name
-            price: item.price,
-            quantity: item.qty,      // match backend field
+        orderItems: cartItems.map((item) => ({
+          product: item._id,
+          name: item.name,
+          price: item.price,
+          quantity: item.qty,
         })),
         totalPrice: totalAmount,
-        });
-
-
+      });
       const orderId = orderRes.data._id;
 
       // 2️⃣ Get Stripe client secret
@@ -75,6 +60,7 @@ function Checkout() {
         setError(`❌ Payment failed: ${result.error.message}`);
       } else if (result.paymentIntent?.status === "succeeded") {
         clearCart();
+        setSuccess("✅ Payment successful!");
         navigate("/order-success", { state: { order: orderRes.data } });
       }
     } catch (err) {
@@ -85,16 +71,12 @@ function Checkout() {
   };
 
   if (!user) {
-    return (
-      <p className="p-10 text-red-500 text-center">
-        You must be logged in to checkout.
-      </p>
-    );
+    return <p className="p-10 text-red-500 text-center">You must be logged in to checkout.</p>;
   }
 
   return (
-    <div className="p-10 max-w-lg mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Checkout</h2>
+    <div className="p-6 max-w-lg mx-auto bg-white shadow rounded-md">
+      <h2 className="text-2xl font-bold mb-6 text-center">Checkout</h2>
 
       {/* User Details */}
       <div className="mb-6 p-4 border rounded bg-gray-50">
@@ -107,35 +89,38 @@ function Checkout() {
       {/* Cart Items */}
       <div className="mb-6">
         <h3 className="font-semibold mb-2">Your Cart</h3>
-        <ul className="mb-2">
+        <ul className="mb-2 divide-y">
           {cartItems.map((item) => (
-            <li key={item._id + Math.random()}>
-              {item.name} x {item.qty} = ${item.price * item.qty}
+            <li key={item._id} className="py-2 flex justify-between">
+              <span>{item.name} x {item.qty}</span>
+              <span>${(item.price * item.qty).toFixed(2)}</span>
             </li>
           ))}
         </ul>
-        <p className="font-bold">Total: ${totalAmount.toFixed(2)}</p>
+        <p className="font-bold text-right">Total: ${totalAmount.toFixed(2)}</p>
       </div>
 
       {/* Payment Form */}
       <form onSubmit={handlePayment} className="space-y-4">
         <CardElement
-          options={{ style: { base: { fontSize: "16px", color: "#32325d" } } }}
+          options={{
+            style: { base: { fontSize: "16px", color: "#32325d", "::placeholder": { color: "#a0aec0" } } },
+          }}
         />
         <button
           type="submit"
           disabled={!stripe || loading || cartItems.length === 0}
-          className={`mt-2 w-full px-4 py-2 rounded text-white ${
-            loading || cartItems.length === 0
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-green-500"
+          className={`w-full py-2 rounded text-white ${
+            loading || cartItems.length === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
           }`}
         >
-          {loading ? "Processing..." : "Pay Now"}
+          {loading ? "Processing..." : `Pay $${totalAmount.toFixed(2)}`}
         </button>
       </form>
 
-      {error && <p className="mt-3 text-center text-red-500">{error}</p>}
+      {/* Feedback */}
+      {error && <p className="mt-4 text-center text-red-500">{error}</p>}
+      {success && <p className="mt-4 text-center text-green-500">{success}</p>}
     </div>
   );
 }
