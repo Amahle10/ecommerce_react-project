@@ -64,7 +64,7 @@ export default function Cart() {
                     Quantity: {item.qty}
                   </p>
                   <p style={{ fontSize: "16px", fontWeight: 600 }}>
-                    Price: ${ (item.price * item.qty).toFixed(2) }
+                    Price: R{ (item.price * item.qty).toFixed(2) }
                   </p>
                 </div>
 
@@ -92,7 +92,7 @@ export default function Cart() {
             {/* Total & Actions */}
             <div style={{ textAlign: "right", marginTop: "20px" }}>
               <p style={{ fontSize: "22px", fontWeight: 700, marginBottom: "15px" }}>
-                Total: ${total.toFixed(2)}
+                Total: R{total.toFixed(2)}
               </p>
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "15px" }}>
                 <button

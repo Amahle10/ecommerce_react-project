@@ -61,7 +61,7 @@ export default function Products() {
               </div>
             )}
             <h3>{product.name}</h3>
-            <p>${product.price}</p>
+            <p>R{product.price}</p>
             <p>{product.description}</p>
             <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
               <Link to={`/edit/${product._id}`} style={{ backgroundColor: "#3b82f6", color: "white", padding: 6, borderRadius: 4 }}>Edit</Link>

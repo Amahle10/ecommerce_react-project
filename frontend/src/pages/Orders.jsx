@@ -58,7 +58,6 @@ export default function Orders() {
 
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: "#f9f9f9", minHeight: "100vh" }}>
-      <Navbar />
       <div style={{ padding: "50px 20px", maxWidth: "900px", margin: "0 auto" }}>
         <h2 style={{ fontSize: "48px", fontWeight: 900, textAlign: "center", marginBottom: "40px" }}>
           My Orders
@@ -96,7 +95,7 @@ export default function Orders() {
               <strong>Payment:</strong> {order.paymentStatus}
             </p>
             <p style={{ marginBottom: "12px", fontWeight: 600 }}>
-              <strong>Total:</strong> ${order.totalPrice.toFixed(2)}
+              <strong>Total:</strong> R{order.totalPrice.toFixed(2)}
             </p>
 
             <div>
@@ -104,7 +103,7 @@ export default function Orders() {
               <ul style={{ paddingLeft: "20px", marginBottom: "10px" }}>
                 {order.orderItems.map((item) => (
                   <li key={item.product?._id || item._id} style={{ marginBottom: "6px" }}>
-                    {item.name} x {item.quantity} = ${(item.price * item.quantity).toFixed(2)}
+                    {item.name} x {item.quantity} = R{(item.price * item.quantity).toFixed(2)}
                   </li>
                 ))}
               </ul>

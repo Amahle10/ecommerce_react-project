@@ -21,11 +21,17 @@ router.post("/pay/:orderId", protect, async (req, res) => {
       metadata: { order_id: orderId, user_id: req.user._id.toString() },
     });
 
-    res.json({ clientSecret: paymentIntent.client_secret });
+    // ✅ Immediately update order to paid (safe in test mode)
+    order.paymentStatus = "paid";
+    order.orderStatus = "processing";
+    await order.save();
+
+    res.json({ clientSecret: paymentIntent.client_secret, order });
   } catch (error) {
     console.error("Payment error:", error.message);
     res.status(500).json({ message: error.message });
   }
 });
+
 
 export default router;
