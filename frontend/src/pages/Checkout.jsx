@@ -5,6 +5,7 @@ import { AuthContext } from "../context/AuthContext";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import API from "../api/axios";
+import Navbar from "../components/Navbar";
 
 // Load Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
@@ -15,10 +16,10 @@ function Checkout() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [order, setOrder] = useState(null); // store order info for display
 
   const stripe = useStripe();
   const elements = useElements();
-  const navigate = useNavigate();
 
   const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
 
@@ -44,7 +45,9 @@ function Checkout() {
         })),
         totalPrice: totalAmount,
       });
+
       const orderId = orderRes.data._id;
+      setOrder(orderRes.data); // save order for display
 
       // 2️⃣ Get Stripe client secret
       const paymentRes = await API.post(`/payment/pay/${orderId}`);
@@ -61,7 +64,6 @@ function Checkout() {
       } else if (result.paymentIntent?.status === "succeeded") {
         clearCart();
         setSuccess("✅ Payment successful!");
-        navigate("/order-success", { state: { order: orderRes.data } });
       }
     } catch (err) {
       setError(`❌ Error: ${err.response?.data?.message || err.message}`);
@@ -70,60 +72,69 @@ function Checkout() {
     }
   };
 
-  if (!user) {
-    return <p className="p-10 text-red-500 text-center">You must be logged in to checkout.</p>;
-  }
+  if (!user)
+    return (
+      <p style={{ padding: 40, textAlign: "center", color: "#ff0000", fontFamily: "'Inter', sans-serif" }}>
+        You must be logged in to checkout.
+      </p>
+    );
 
   return (
-    <div className="p-6 max-w-lg mx-auto bg-white shadow rounded-md">
-      <h2 className="text-2xl font-bold mb-6 text-center">Checkout</h2>
+    <div style={{ fontFamily: "'Inter', sans-serif", minHeight: "100vh", background: "#f9f9f9" }}>
+      <div style={{ maxWidth: "800px", margin: "0 auto", padding: "50px 20px" }}>
+        <h2 style={{ fontSize: "48px", fontWeight: 900, textAlign: "center", marginBottom: "40px" }}>Checkout</h2>
 
-      {/* User Details */}
-      <div className="mb-6 p-4 border rounded bg-gray-50">
-        <h3 className="font-semibold mb-2">Your Details</h3>
-        <p><strong>Name:</strong> {user.name}</p>
-        <p><strong>Email:</strong> {user.email}</p>
-        <p><strong>Role:</strong> {user.role}</p>
-      </div>
+        {/* User Details */}
+        <div style={{ background: "#fff", borderRadius: "16px", padding: "20px", marginBottom: "30px", boxShadow: "0 8px 20px rgba(0,0,0,0.05)", border: "1px solid #000" }}>
+          <h3 style={{ fontWeight: 700, marginBottom: "10px" }}>Your Details</h3>
+          <p><strong>Name:</strong> {user.name}</p>
+          <p><strong>Email:</strong> {user.email}</p>
+          <p><strong>Role:</strong> {user.role}</p>
+        </div>
 
-      {/* Cart Items */}
-      <div className="mb-6">
-        <h3 className="font-semibold mb-2">Your Cart</h3>
-        <ul className="mb-2 divide-y">
+        {/* Cart Items */}
+        <div style={{ background: "#fff", borderRadius: "16px", padding: "20px", marginBottom: "30px", boxShadow: "0 8px 20px rgba(0,0,0,0.05)", border: "1px solid #000" }}>
+          <h3 style={{ fontWeight: 700, marginBottom: "15px" }}>Your Cart</h3>
           {cartItems.map((item) => (
-            <li key={item._id} className="py-2 flex justify-between">
-              <span>{item.name} x {item.qty}</span>
-              <span>${(item.price * item.qty).toFixed(2)}</span>
-            </li>
+            <div key={item._id + Math.random()} style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "12px" }}>
+              <img src={item.image ? `http://localhost:5000${item.image}` : ""} alt={item.name} style={{ width: "70px", height: "70px", objectFit: "cover", borderRadius: "12px", background: "#eee" }} />
+              <div style={{ flex: 1 }}>
+                <p style={{ fontWeight: 700 }}>{item.name}</p>
+                <p>Qty: {item.qty}</p>
+              </div>
+              <p style={{ fontWeight: 600 }}>${(item.price * item.qty).toFixed(2)}</p>
+            </div>
           ))}
-        </ul>
-        <p className="font-bold text-right">Total: ${totalAmount.toFixed(2)}</p>
+          <p style={{ fontWeight: 700, textAlign: "right", marginTop: "15px" }}>Total: ${totalAmount.toFixed(2)}</p>
+        </div>
+
+        {/* Payment Form */}
+        <form onSubmit={handlePayment} style={{ background: "#fff", borderRadius: "16px", padding: "20px", boxShadow: "0 8px 20px rgba(0,0,0,0.05)", border: "1px solid #000" }}>
+          <h3 style={{ fontWeight: 700, marginBottom: "15px" }}>Payment</h3>
+          <CardElement options={{ style: { base: { fontSize: "16px", color: "#32325d", "::placeholder": { color: "#a0aec0" } } } }} />
+          <button type="submit" disabled={!stripe || loading || cartItems.length === 0} style={{ marginTop: "20px", width: "100%", background: loading || cartItems.length === 0 ? "#ccc" : "#000", color: "#fff", padding: "12px", fontWeight: 700, borderRadius: "12px", border: "none", cursor: loading || cartItems.length === 0 ? "not-allowed" : "pointer", transition: "background 0.2s" }}>
+            {loading ? "Processing..." : `Pay $${totalAmount.toFixed(2)}`}
+          </button>
+        </form>
+
+        {/* Display success/error messages */}
+        {error && <p style={{ marginTop: "15px", color: "red", textAlign: "center" }}>{error}</p>}
+        {success && (
+          <div style={{ marginTop: "15px", textAlign: "center", color: "green" }}>
+            <p>{success}</p>
+            {order && (
+              <div style={{ marginTop: "10px", textAlign: "left" }}>
+                <p><strong>Order ID:</strong> {order._id}</p>
+                <p><strong>Total:</strong> ${order.totalPrice.toFixed(2)}</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
-
-      {/* Payment Form */}
-      <form onSubmit={handlePayment} className="space-y-4">
-        <CardElement
-          options={{
-            style: { base: { fontSize: "16px", color: "#32325d", "::placeholder": { color: "#a0aec0" } } },
-          }}
-        />
-        <button
-          type="submit"
-          disabled={!stripe || loading || cartItems.length === 0}
-          className={`w-full py-2 rounded text-white ${
-            loading || cartItems.length === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
-          }`}
-        >
-          {loading ? "Processing..." : `Pay $${totalAmount.toFixed(2)}`}
-        </button>
-      </form>
-
-      {/* Feedback */}
-      {error && <p className="mt-4 text-center text-red-500">{error}</p>}
-      {success && <p className="mt-4 text-center text-green-500">{success}</p>}
     </div>
   );
 }
+
 
 export default function CheckoutForm() {
   return (

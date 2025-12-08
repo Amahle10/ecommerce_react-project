@@ -1,24 +1,25 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import ApiTest from "./pages/ApiTest";
-import Register from "./pages/Register";
-import Login from "./pages/Login";
 import Products from "./pages/Products";
+import Orders from "./pages/Orders";
+import CheckoutForm from "./pages/Checkout";
+import Home from "./pages/Home";
 import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import OrderSuccess from "./pages/OrderSuccess";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+
 function App() {
   return (
     <Router>
       <Navbar />
       <Routes>
-        <Route path="/" element={<ApiTest />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/orders" element={<Orders />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/order-success" element={<OrderSuccess />} />
+        <Route path="/checkout" element={<CheckoutForm />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </Router>
   );

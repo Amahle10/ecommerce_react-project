@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../api/axios";
 
 export default function EditProduct() {
-  const { id } = useParams(); // get product ID from URL
+  const { id } = useParams(); 
   const navigate = useNavigate();
 
   const [product, setProduct] = useState({
@@ -11,6 +11,7 @@ export default function EditProduct() {
     description: "",
     price: "",
     stock: "",
+    image: null,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -35,11 +36,26 @@ export default function EditProduct() {
     setProduct((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleImageChange = (e) => {
+    setProduct((prev) => ({ ...prev, image: e.target.files[0] }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await API.put(`/products/${id}`, product); // PUT request to update
-      navigate("/"); // go back to products list
+      const formData = new FormData();
+      formData.append("name", product.name);
+      formData.append("description", product.description);
+      formData.append("price", product.price);
+      formData.append("stock", product.stock);
+      if (product.image instanceof File) {
+        formData.append("image", product.image);
+      }
+
+      await API.put(`/products/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      navigate("/"); 
     } catch (err) {
       setError("❌ Failed to update product");
     }
@@ -49,55 +65,84 @@ export default function EditProduct() {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="p-5 max-w-md mx-auto">
-      <h2 className="text-xl font-bold mb-4">Edit Product</h2>
-      <form onSubmit={handleSubmit} className="space-y-3">
+    <div style={{ padding: 20, maxWidth: 500, margin: "0 auto" }}>
+      <h2 style={{ fontSize: 20, fontWeight: "bold", marginBottom: 12 }}>Edit Product</h2>
+
+      {product.image && typeof product.image === "string" && (
+        <img
+          src={`http://localhost:5000${product.image}`}
+          alt={product.name}
+          style={{
+            width: "100%",
+            height: 200,
+            objectFit: "cover",
+            borderRadius: 6,
+            marginBottom: 12,
+            border: "1px solid #ddd",
+          }}
+        />
+      )}
+
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <div>
-          <label className="block mb-1 font-semibold">Name:</label>
+          <label style={{ display: "block", fontWeight: "bold", marginBottom: 4 }}>Name</label>
           <input
             type="text"
             name="name"
             value={product.name}
             onChange={handleChange}
-            className="border p-2 w-full rounded"
+            style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
           />
         </div>
 
         <div>
-          <label className="block mb-1 font-semibold">Description:</label>
+          <label style={{ display: "block", fontWeight: "bold", marginBottom: 4 }}>Description</label>
           <textarea
             name="description"
             value={product.description}
             onChange={handleChange}
-            className="border p-2 w-full rounded"
+            style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
           />
         </div>
 
         <div>
-          <label className="block mb-1 font-semibold">Price:</label>
+          <label style={{ display: "block", fontWeight: "bold", marginBottom: 4 }}>Price</label>
           <input
             type="number"
             name="price"
             value={product.price}
             onChange={handleChange}
-            className="border p-2 w-full rounded"
+            style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
           />
         </div>
 
         <div>
-          <label className="block mb-1 font-semibold">Stock:</label>
+          <label style={{ display: "block", fontWeight: "bold", marginBottom: 4 }}>Stock</label>
           <input
             type="number"
             name="stock"
             value={product.stock}
             onChange={handleChange}
-            className="border p-2 w-full rounded"
+            style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
           />
+        </div>
+
+        <div>
+          <label style={{ display: "block", fontWeight: "bold", marginBottom: 4 }}>Image</label>
+          <input type="file" onChange={handleImageChange} />
         </div>
 
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          style={{
+            backgroundColor: "#3b82f6",
+            color: "white",
+            padding: 10,
+            borderRadius: 6,
+            border: "none",
+            cursor: "pointer",
+            fontWeight: "bold",
+          }}
         >
           Update Product
         </button>

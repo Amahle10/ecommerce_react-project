@@ -23,12 +23,12 @@ export default function Products() {
     fetchProducts();
   }, []);
 
-  if (loading) return <p>Loading products...</p>;
-  if (error) return <p>{error}</p>;
+  if (loading) return <p style={styles.loading}>Loading products...</p>;
+  if (error) return <p style={styles.error}>{error}</p>;
 
   return (
     <div className="page">
-      <h2>Products</h2>
+      <h2 style={styles.heading}>Collection</h2>
       <div className="products-grid">
         {products.map((product) => (
           <div key={product._id} className="product-card">
@@ -53,3 +53,27 @@ export default function Products() {
     </div>
   );
 }
+
+const styles = {
+  heading: {
+    textAlign: "center",
+    fontSize: "2.5rem",
+    fontWeight: "800",
+    letterSpacing: "3px",
+    textTransform: "uppercase",
+    marginBottom: "2rem",
+    fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+    color: "#000",
+  },
+  loading: {
+    fontSize: "1.2rem",
+    textAlign: "center",
+    marginTop: "2rem",
+  },
+  error: {
+    fontSize: "1.2rem",
+    textAlign: "center",
+    marginTop: "2rem",
+    color: "red",
+  },
+};

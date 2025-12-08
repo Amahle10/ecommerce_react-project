@@ -1,11 +1,10 @@
-// src/pages/Login.jsx
 import { useState, useContext } from "react";
 import API from "../api/axios";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const { login } = useContext(AuthContext); // Context function to update user state
+  const { login } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -23,7 +22,7 @@ export default function Login() {
       setMessage(`✅ Welcome, ${userData.name}!`);
 
       // Redirect to home or checkout after login
-      navigate("/"); // or navigate("/checkout") if coming from cart
+      navigate("/"); // or "/checkout" if coming from cart
     } catch (err) {
       setMessage("❌ Login failed. Check your credentials.");
     }
