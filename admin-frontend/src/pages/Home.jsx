@@ -12,7 +12,6 @@ export default function Home() {
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [loadingProducts, setLoadingProducts] = useState(true);
 
-  // Fetch orders
   const fetchOrders = async () => {
     try {
       setLoadingOrders(true);
@@ -25,7 +24,6 @@ export default function Home() {
     }
   };
 
-  // Fetch products
   const fetchProducts = async () => {
     try {
       setLoadingProducts(true);
@@ -74,7 +72,6 @@ export default function Home() {
         <button onClick={logout} style={btnStyle}>Logout</button>
       </header>
 
-      {/* Orders Summary */}
       <h2 style={{ marginBottom: 20 }}>Orders Summary</h2>
       <div style={{ display: "flex", gap: 20, marginBottom: 40 }}>
         <OrderCard title="Pending Orders" count={pendingOrders.length} navigate={navigate} />
@@ -82,7 +79,6 @@ export default function Home() {
         <OrderCard title="Completed Orders" count={completedOrders.length} navigate={navigate} />
       </div>
 
-      {/* Products */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <h2>Products</h2>
         <Link to="/add" style={btnStyle}>➕ Add Product</Link>
@@ -99,6 +95,7 @@ export default function Home() {
               )}
 
               <h3>{product.name}</h3>
+              <p><strong>Category:</strong> {product.category}</p>
               <p><strong>Price:</strong> R{product.price}</p>
               <p style={{ fontWeight: 600, color: product.stock > 0 ? "green" : "red" }}>
                 Stock: {product.stock} {product.stock === 0 && "(Out of stock)"}
