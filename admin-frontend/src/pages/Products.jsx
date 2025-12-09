@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import API from "../api/axios";
 import { AuthContext } from "../context/AuthContext";
 
-export default function Products() {
+export default function AdminProducts() {
   const { admin, logout } = useContext(AuthContext);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,8 +11,21 @@ export default function Products() {
 
   const fetchProducts = async () => {
     try {
-      const res = await API.get("/products");
-      setProducts(res.data);
+      const res = await API.get("/products/admin");
+
+      // Normalize stock and variants
+      const normalized = res.data.map(p => ({
+        ...p,
+        stock: Number(p.stock) || 0,
+        variants: Array.isArray(p.variants)
+          ? p.variants.map(v => ({
+              ...v,
+              stock: Number(v.stock) || 0,
+            }))
+          : [],
+      }));
+
+      setProducts(normalized);
     } catch (err) {
       setError("❌ Failed to load products");
     } finally {
@@ -25,14 +38,13 @@ export default function Products() {
     try {
       await API.delete(`/products/${id}`);
       setProducts(products.filter((p) => p._id !== id));
-    } catch {
+    } catch (err) {
       alert("Failed to delete product");
     }
   };
 
   useEffect(() => {
-    if (!admin) return;
-    fetchProducts();
+    if (admin) fetchProducts();
   }, [admin]);
 
   if (!admin) return <p>Please log in as admin</p>;
@@ -45,27 +57,98 @@ export default function Products() {
         <h2>Admin Products</h2>
         <button onClick={logout}>Logout</button>
       </div>
-      <Link to="/add" style={{ marginBottom: 12, display: "inline-block" }}>➕ Add Product</Link>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
+
+      <Link to="/add" style={{ marginBottom: 12, display: "inline-block" }}>
+        ➕ Add Product
+      </Link>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))", gap: 16 }}>
         {products.map((product) => (
-          <div key={product._id} style={{ border: "1px solid #ddd", padding: 12, borderRadius: 6 }}>
+          <div
+            key={product._id}
+            style={{
+              border: "1px solid #ddd",
+              padding: 12,
+              borderRadius: 6,
+              background: "#fafafa",
+            }}
+          >
             {product.image ? (
               <img
                 src={`http://localhost:5000${product.image}`}
                 alt={product.name}
-                style={{ width: "100%", height: 200, objectFit: "cover", borderRadius: 6, marginBottom: 8 }}
+                style={{
+                  width: "100%",
+                  height: 200,
+                  objectFit: "cover",
+                  borderRadius: 6,
+                  marginBottom: 8,
+                }}
               />
             ) : (
-              <div style={{ width: "100%", height: 200, backgroundColor: "#eee", borderRadius: 6, marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div
+                style={{
+                  width: "100%",
+                  height: 200,
+                  backgroundColor: "#eee",
+                  borderRadius: 6,
+                  marginBottom: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
                 No Image
               </div>
             )}
+
             <h3>{product.name}</h3>
-            <p>R{product.price}</p>
+            <p><strong>Price:</strong> R{product.price}</p>
+
+            <p style={{ fontWeight: 600, color: product.stock > 0 ? "green" : "red" }}>
+              Stock: {product.stock} {product.stock === 0 && "(Out of stock)"}
+            </p>
+
+            {product.variants.length > 0 && (
+              <div style={{ marginTop: 6 }}>
+                <strong>Variants:</strong>
+                <ul style={{ paddingLeft: 20, marginTop: 4 }}>
+                  {product.variants.map((v, i) => (
+                    <li key={i} style={{ color: v.stock > 0 ? "green" : "red" }}>
+                      {v.name || "Unnamed variant"} — R{v.price ?? "N/A"} — Stock: {v.stock} {v.stock === 0 && "(Out of stock)"}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <p>{product.description}</p>
+
             <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
-              <Link to={`/edit/${product._id}`} style={{ backgroundColor: "#3b82f6", color: "white", padding: 6, borderRadius: 4 }}>Edit</Link>
-              <button onClick={() => deleteProduct(product._id)} style={{ backgroundColor: "#dc2626", color: "white", padding: 6, borderRadius: 4 }}>Delete</button>
+              <Link
+                to={`/edit/${product._id}`}
+                style={{
+                  backgroundColor: "#3b82f6",
+                  color: "white",
+                  padding: 6,
+                  borderRadius: 4,
+                  textAlign: "center",
+                }}
+              >
+                Edit
+              </Link>
+
+              <button
+                onClick={() => deleteProduct(product._id)}
+                style={{
+                  backgroundColor: "#dc2626",
+                  color: "white",
+                  padding: 6,
+                  borderRadius: 4,
+                }}
+              >
+                Delete
+              </button>
             </div>
           </div>
         ))}

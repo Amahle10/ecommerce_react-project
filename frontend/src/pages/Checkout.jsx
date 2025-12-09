@@ -5,7 +5,6 @@ import { AuthContext } from "../context/AuthContext";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import API from "../api/axios";
-import Navbar from "../components/Navbar";
 
 // Load Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
@@ -36,7 +35,7 @@ function Checkout() {
       setError("");
       setSuccess("");
 
-      // 1️⃣ Create order
+      // 1️⃣ Create order in backend
       const orderRes = await API.post("/orders", {
         orderItems: cartItems.map(item => ({
           product: item._id,
@@ -50,11 +49,11 @@ function Checkout() {
       const orderId = orderRes.data._id;
       setOrder(orderRes.data);
 
-      // 2️⃣ Get Stripe client secret
+      // 2️⃣ Create Stripe PaymentIntent
       const paymentRes = await API.post(`/orders/pay/${orderId}`);
       const clientSecret = paymentRes.data.clientSecret;
 
-      // 3️⃣ Confirm payment
+      // 3️⃣ Confirm card payment
       const cardElement = elements.getElement(CardElement);
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: { card: cardElement },
@@ -63,11 +62,8 @@ function Checkout() {
       if (result.error) {
         setError(`❌ Payment failed: ${result.error.message}`);
       } else if (result.paymentIntent?.status === "succeeded") {
-        // 4️⃣ Update order status immediately
-        await API.put(`/orders/${orderId}`, {
-          paymentStatus: "paid",
-          orderStatus: "processing",
-        });
+        // 4️⃣ Update order status in backend
+        await API.put(`/orders/pay/${orderId}/status`);
 
         clearCart();
         setSuccess("✅ Payment successful!");
@@ -83,19 +79,7 @@ function Checkout() {
     return (
       <div style={{ textAlign: "center", padding: "50px", fontFamily: "'Inter', sans-serif" }}>
         <p style={{ color: "red", fontWeight: 700 }}>You must be logged in to checkout.</p>
-        <button
-          onClick={() => navigate("/login")}
-          style={{
-            marginTop: "20px",
-            padding: "10px 20px",
-            fontWeight: 700,
-            borderRadius: "8px",
-            border: "none",
-            cursor: "pointer",
-            backgroundColor: "#000",
-            color: "#fff",
-          }}
-        >
+        <button onClick={() => navigate("/login")} style={styles.button}>
           Login
         </button>
       </div>
@@ -151,7 +135,7 @@ function Checkout() {
               transition: "background 0.2s",
             }}
           >
-            {loading ? "Processing..." : `Pay $${totalAmount.toFixed(2)}`}
+            {loading ? "Processing..." : `Pay R${totalAmount.toFixed(2)}`}
           </button>
         </form>
 
@@ -162,7 +146,7 @@ function Checkout() {
             <p>{success}</p>
             <div style={{ marginTop: "10px", textAlign: "left" }}>
               <p><strong>Order ID:</strong> {order._id}</p>
-              <p><strong>Total:</strong> ${order.totalPrice.toFixed(2)}</p>
+              <p><strong>Total:</strong> R{order.totalPrice.toFixed(2)}</p>
               <p><strong>Status:</strong> processing</p>
               <p><strong>Payment:</strong> paid</p>
             </div>
@@ -180,6 +164,19 @@ const cardStyle = {
   marginBottom: "30px",
   boxShadow: "0 8px 20px rgba(0,0,0,0.05)",
   border: "1px solid #000",
+};
+
+const styles = {
+  button: {
+    marginTop: "20px",
+    padding: "10px 20px",
+    fontWeight: 700,
+    borderRadius: "8px",
+    border: "none",
+    cursor: "pointer",
+    backgroundColor: "#000",
+    color: "#fff",
+  }
 };
 
 export default function CheckoutForm() {

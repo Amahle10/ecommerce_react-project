@@ -74,11 +74,13 @@ router.post("/pay/:orderId", protect, async (req, res) => {
     if (!order) return res.status(404).json({ message: "Order not found" });
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(order.totalPrice * 100), // convert to cents
-      currency: "usd",
+      amount: Math.round(order.totalPrice * 100), // amount in cents
+      currency: "zar", // was "usd"
       payment_method_types: ["card"],
       metadata: { order_id: orderId, user_id: req.user._id.toString() },
     });
+
+
 
     res.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
@@ -90,6 +92,21 @@ router.post("/pay/:orderId", protect, async (req, res) => {
 // ✅ Test route
 router.get("/test", (req, res) => {
   res.send("Order route works ✅");
+});
+
+router.put("/pay/:id/status", protect, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    order.paymentStatus = "paid";
+    order.orderStatus = "processing";
+
+    const updatedOrder = await order.save();
+    res.json(updatedOrder);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 export default router;

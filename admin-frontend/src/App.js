@@ -6,6 +6,8 @@ import AddProduct from "./pages/AddProduct";
 import EditProduct from "./pages/EditProduct";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Home from "./pages/Home";
+import Orders from "./pages/Orders";
 
 function App() {
   return (
@@ -21,10 +23,29 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/products"
+            element={
+              <ProtectedRoute>
                 <Products />
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute>
+                <Orders />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/add"
             element={
@@ -33,6 +54,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/edit/:id"
             element={

@@ -7,15 +7,22 @@ export default function AddProduct() {
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [stock, setStock] = useState(10);
-  const [category, setCategory] = useState("");
-  const [image, setImage] = useState(null); // File
+  const [category, setCategory] = useState("electronics");
+  const [image, setImage] = useState(null);
   const navigate = useNavigate();
+
+  const categories = [
+    "electronics",
+    "fashion",
+    "shoes",
+    "accessories",
+    "lifestyle",
+  ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      // Use FormData to send image file
       const formData = new FormData();
       formData.append("name", name);
       formData.append("price", price);
@@ -28,7 +35,8 @@ export default function AddProduct() {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      navigate("/"); // Go back to product list
+      // Redirect to Home/Admin Dashboard after adding
+      navigate("/");
     } catch (err) {
       console.error(err);
       alert("Failed to add product. Make sure all fields are correct.");
@@ -65,12 +73,18 @@ export default function AddProduct() {
         style={{ display: "block", margin: "10px 0", width: "100%" }}
       />
 
-      <input
-        placeholder="Category"
+      <label style={{ fontWeight: "600" }}>Category</label>
+      <select
         value={category}
         onChange={(e) => setCategory(e.target.value)}
-        style={{ display: "block", margin: "10px 0", width: "100%" }}
-      />
+        style={{ display: "block", margin: "10px 0", width: "100%", padding: 8 }}
+      >
+        {categories.map((cat) => (
+          <option key={cat} value={cat}>
+            {cat.charAt(0).toUpperCase() + cat.slice(1)}
+          </option>
+        ))}
+      </select>
 
       <textarea
         placeholder="Description"

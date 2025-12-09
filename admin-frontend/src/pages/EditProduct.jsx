@@ -10,7 +10,7 @@ export default function EditProduct() {
     name: "",
     description: "",
     price: "",
-    stock: "",
+    stock: 1, // default stock
     image: null,
   });
   const [loading, setLoading] = useState(true);
@@ -19,8 +19,12 @@ export default function EditProduct() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await API.get(`/products/${id}`);
-        setProduct(res.data);
+        // Use admin endpoint to get full data including real stock
+        const res = await API.get(`/products/admin/${id}`);
+        setProduct({
+          ...res.data,
+          stock: res.data.stock ?? 1 // fallback to 1 if undefined
+        });
       } catch (err) {
         setError("❌ Failed to load product");
       } finally {
@@ -30,6 +34,7 @@ export default function EditProduct() {
 
     fetchProduct();
   }, [id]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,7 +52,7 @@ export default function EditProduct() {
       formData.append("name", product.name);
       formData.append("description", product.description);
       formData.append("price", product.price);
-      formData.append("stock", product.stock);
+      formData.append("stock", product.stock || 1); // fallback to 1
       if (product.image instanceof File) {
         formData.append("image", product.image);
       }
@@ -92,6 +97,7 @@ export default function EditProduct() {
             value={product.name}
             onChange={handleChange}
             style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
+            required
           />
         </div>
 
@@ -102,6 +108,7 @@ export default function EditProduct() {
             value={product.description}
             onChange={handleChange}
             style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
+            required
           />
         </div>
 
@@ -112,7 +119,9 @@ export default function EditProduct() {
             name="price"
             value={product.price}
             onChange={handleChange}
+            min={0}
             style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
+            required
           />
         </div>
 
@@ -123,7 +132,9 @@ export default function EditProduct() {
             name="stock"
             value={product.stock}
             onChange={handleChange}
+            min={0}
             style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
+            required
           />
         </div>
 
