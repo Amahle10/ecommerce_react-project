@@ -6,6 +6,7 @@ export default function Orders() {
   const { admin } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [trackingInput, setTrackingInput] = useState({}); // store temp tracking numbers per order
 
   const fetchOrders = async () => {
     try {
@@ -27,7 +28,6 @@ export default function Orders() {
   const updateStatus = async (orderId, status) => {
     try {
       await API.put(`/orders/${orderId}`, { orderStatus: status });
-      // Update locally
       setOrders(orders.map(o => o._id === orderId ? { ...o, orderStatus: status } : o));
     } catch (err) {
       alert("Failed to update order status");
@@ -41,6 +41,18 @@ export default function Orders() {
       setOrders(orders.map(o => o._id === orderId ? { ...o, paymentStatus } : o));
     } catch (err) {
       alert("Failed to update payment status");
+      console.error(err.response?.data || err.message);
+    }
+  };
+
+  const updateTracking = async (orderId) => {
+    try {
+      const trackingNumber = trackingInput[orderId];
+      await API.put(`/orders/${orderId}`, { trackingNumber, orderStatus: "shipped" });
+      setOrders(orders.map(o => o._id === orderId ? { ...o, trackingNumber, orderStatus: "shipped" } : o));
+      setTrackingInput(prev => ({ ...prev, [orderId]: "" }));
+    } catch (err) {
+      alert("Failed to update tracking number");
       console.error(err.response?.data || err.message);
     }
   };
@@ -64,6 +76,7 @@ export default function Orders() {
               <div>
                 <p><strong>Status:</strong> {order.orderStatus}</p>
                 <p><strong>Payment:</strong> {order.paymentStatus}</p>
+                {order.trackingNumber && <p><strong>Tracking #:</strong> {order.trackingNumber}</p>}
               </div>
             </div>
 
@@ -77,19 +90,33 @@ export default function Orders() {
             </div>
 
             {/* Status buttons */}
-            <div style={{ display: "flex", gap: 10, marginTop: 15 }}>
-              {order.orderStatus !== "processing" && (
+            <div style={{ display: "flex", gap: 10, marginTop: 15, flexWrap: "wrap" }}>
+              {order.orderStatus !== "processing" && order.orderStatus === "pending" && (
                 <button onClick={() => updateStatus(order._id, "processing")} style={btn}>
                   Mark Processing
                 </button>
               )}
-              {order.orderStatus !== "completed" && (
+              {order.orderStatus !== "shipped" && order.orderStatus === "processing" && (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Tracking #"
+                    value={trackingInput[order._id] || ""}
+                    onChange={(e) => setTrackingInput(prev => ({ ...prev, [order._id]: e.target.value }))}
+                    style={trackingInputStyle}
+                  />
+                  <button onClick={() => updateTracking(order._id)} style={{ ...btn, backgroundColor: "#f59e0b" }}>
+                    Mark Shipped
+                  </button>
+                </>
+              )}
+              {order.orderStatus !== "completed" && order.orderStatus === "shipped" && (
                 <button onClick={() => updateStatus(order._id, "completed")} style={{ ...btn, backgroundColor: "#16a34a" }}>
                   Mark Completed
                 </button>
               )}
               {order.paymentStatus !== "paid" && (
-                <button onClick={() => updatePayment(order._id, "paid")} style={{ ...btn, backgroundColor: "#f59e0b" }}>
+                <button onClick={() => updatePayment(order._id, "paid")} style={{ ...btn, backgroundColor: "#3b82f6" }}>
                   Mark Paid
                 </button>
               )}
@@ -117,4 +144,11 @@ const btn = {
   fontWeight: 700,
   backgroundColor: "#3b82f6",
   color: "#fff",
+};
+
+const trackingInputStyle = {
+  padding: "8px",
+  borderRadius: 6,
+  border: "1px solid #ccc",
+  minWidth: "120px",
 };

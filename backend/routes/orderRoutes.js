@@ -12,15 +12,24 @@ const router = express.Router();
 
 // Create new order
 router.post("/", protect, async (req, res) => {
-  const { orderItems, totalPrice } = req.body;
-  if (!orderItems || orderItems.length === 0) return res.status(400).json({ message: "No order items" });
+  const { orderItems, totalPrice, shippingAddress } = req.body;
+
+  if (!orderItems || orderItems.length === 0)
+    return res.status(400).json({ message: "No order items" });
+
+  // Use provided shipping address or user's saved address
+  const finalAddress = shippingAddress || req.user.address;
+  if (!finalAddress)
+    return res.status(400).json({ message: "Shipping address is required" });
 
   try {
     const order = new Order({
       user: req.user._id,
       orderItems,
       totalPrice,
+      shippingAddress: finalAddress,
     });
+
     const createdOrder = await order.save();
     res.status(201).json(createdOrder);
   } catch (err) {
@@ -31,7 +40,10 @@ router.post("/", protect, async (req, res) => {
 // Get my orders
 router.get("/myorders", protect, async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user._id }).populate("orderItems.product", "name price");
+    const orders = await Order.find({ user: req.user._id }).populate(
+      "orderItems.product",
+      "name price"
+    );
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: err.message });
