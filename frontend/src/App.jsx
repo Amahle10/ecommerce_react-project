@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Products from "./pages/Products";
+import SingleProduct from "./pages/SingleProduct"; // <- import this
 import Orders from "./pages/Orders";
 import CheckoutForm from "./pages/Checkout";
 import Home from "./pages/Home";
@@ -15,6 +16,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/products/:id" element={<SingleProduct />} /> {/* <- add this */}
         <Route path="/orders" element={<Orders />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<CheckoutForm />} />

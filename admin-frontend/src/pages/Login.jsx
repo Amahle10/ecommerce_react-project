@@ -1,54 +1,43 @@
 import { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import API from "../api/axios";
 import { AuthContext } from "../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { setAdmin } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const res = await API.post("/auth/login", { email, password });
-      if (res.data.role !== "admin") {
-        alert("You must log in as admin");
-        return;
-      }
-      setAdmin(res.data); // store admin in context
-      localStorage.setItem("admin", JSON.stringify(res.data)); // persist login
-      navigate("/"); // go to products page
-    } catch (err) {
-      alert("Invalid credentials");
-    }
+    const result = await login(email, password);
+    if (result.success) navigate("/"); // go to home/admin dashboard
+    else alert(result.message);
   };
 
   return (
     <div
       style={{
         display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
         justifyContent: "center",
+        alignItems: "center",
         minHeight: "100vh",
-        padding: "20px",
-        backgroundColor: "#f9fafb",
+        backgroundColor: "#f3f4f6",
+        padding: 20,
       }}
     >
       <form
         onSubmit={handleSubmit}
         style={{
-          padding: "30px",
-          maxWidth: "400px",
-          width: "100%",
-          backgroundColor: "white",
-          borderRadius: "8px",
+          backgroundColor: "#fff",
+          padding: 30,
+          borderRadius: 8,
           boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          width: "100%",
+          maxWidth: 400,
         }}
       >
-        <h2 style={{ marginBottom: "20px", textAlign: "center" }}>Admin Login</h2>
+        <h2 style={{ textAlign: "center", marginBottom: 20 }}>Admin Login</h2>
 
         <input
           type="email"
@@ -58,10 +47,10 @@ export default function Login() {
           required
           style={{
             display: "block",
-            margin: "10px 0",
             width: "100%",
-            padding: "10px",
-            borderRadius: "4px",
+            padding: 10,
+            marginBottom: 15,
+            borderRadius: 4,
             border: "1px solid #ccc",
           }}
         />
@@ -74,10 +63,10 @@ export default function Login() {
           required
           style={{
             display: "block",
-            margin: "10px 0",
             width: "100%",
-            padding: "10px",
-            borderRadius: "4px",
+            padding: 10,
+            marginBottom: 15,
+            borderRadius: 4,
             border: "1px solid #ccc",
           }}
         />
@@ -86,18 +75,18 @@ export default function Login() {
           type="submit"
           style={{
             width: "100%",
+            padding: 10,
             backgroundColor: "#3b82f6",
-            color: "white",
-            padding: "10px",
-            borderRadius: "4px",
-            marginTop: "10px",
+            color: "#fff",
+            borderRadius: 4,
             fontWeight: "bold",
+            cursor: "pointer",
           }}
         >
           Login
         </button>
 
-        <p style={{ marginTop: "15px", textAlign: "center", fontSize: "14px" }}>
+        <p style={{ marginTop: 15, textAlign: "center", fontSize: 14 }}>
           Don't have an account?{" "}
           <Link to="/register" style={{ color: "#3b82f6", fontWeight: "bold" }}>
             Register
