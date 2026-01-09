@@ -80,7 +80,7 @@ function CheckoutFormInner() {
         setError(`❌ Payment failed: ${result.error.message}`);
       } else if (result.paymentIntent?.status === "succeeded") {
         const config = { headers: { Authorization: `Bearer ${user.token}` } };
-        await API.put(`/orders/pay/${order._id}/status`, {}, config);
+        await API.put(`/orders/${order._id}/pay`, {}, config);
         clearCart();
         setSuccess("✅ Payment successful!");
       }
