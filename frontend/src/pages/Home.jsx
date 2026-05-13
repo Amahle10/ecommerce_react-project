@@ -11,6 +11,8 @@ const heroImages = [
   "/hero/gettyimages-1171026448-612x612.jpg",
   "/hero/gettyimages-1922702237-612x612.jpg",
   "/hero/gettyimages-1922706523-612x612.jpg",
+  "/hero/olena-bohovyk-CKMUBf4WV4w-unsplash.jpg",
+  "/hero/joecalih-Gve-iqK8PyA-unsplash.jpg",
 ];
 
 export default function Home() {
