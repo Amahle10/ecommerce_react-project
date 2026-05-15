@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import { protect } from "../middleware/authMiddleware.js";
 import Order from "../models/Order.js";
