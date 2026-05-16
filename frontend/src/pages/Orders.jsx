@@ -93,7 +93,7 @@ export default function Orders() {
 
           <p>
             <strong>Status:</strong>{" "}
-            {order.isDelivered ? "Delivered" : "Processing"}
+            {order.isDelivered ? "Delivered" : "Pending"}
           </p>
 
           <p>

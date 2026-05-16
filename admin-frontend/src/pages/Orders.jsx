@@ -7,12 +7,12 @@ export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [trackingInput, setTrackingInput] = useState({}); // store temp tracking numbers per order
-
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const res = await API.get("/orders"); // Admin endpoint
+      const res = await API.get("/orders"); // User-specific endpoint
       setOrders(res.data);
+      console.log("Fetched orders:", res.data);
     } catch (err) {
       console.error(err.response?.data || err.message);
     } finally {

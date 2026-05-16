@@ -15,7 +15,7 @@ export default function Home() {
   const fetchOrders = async () => {
     try {
       setLoadingOrders(true);
-      const res = await API.get("/orders");
+      const res = await API.get("/orders/myorders"); // User-specific endpoint
       setOrders(res.data);
     } catch (err) {
       console.error(err.response?.data || err.message);

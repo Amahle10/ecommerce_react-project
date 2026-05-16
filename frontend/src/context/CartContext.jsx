@@ -20,12 +20,13 @@ export const CartProvider = ({ children }) => {
       const existing = prevItems.find((item) => item._id === product._id);
       if (existing) {
         return prevItems.map((item) =>
-          item._id === product._id
-            ? { ...item, qty: item.qty + 1 }
+          item._id === product._id,
+          item.status === "Pending"
+            ? { ...item, qty: item.qty + 1, status: "Pending" }
             : item
         );
       } else {
-        return [...prevItems, { ...product, qty: 1 }];
+        return [...prevItems, { ...product, qty: 1, status: "Pending" }];
       }
     });
   };

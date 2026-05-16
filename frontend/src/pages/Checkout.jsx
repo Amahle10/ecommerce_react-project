@@ -48,6 +48,7 @@ function CheckoutFormInner() {
           name: item.name,
           price: item.price,
           quantity: item.qty,
+          status: item.status,
         })),
         totalPrice: totalAmount,
         shippingAddress: address,
@@ -203,7 +204,7 @@ function CheckoutFormInner() {
           <div style={{ marginTop: "10px", textAlign: "left" }}>
             <p><strong>Order ID:</strong> {order._id}</p>
             <p><strong>Total:</strong> R{order.totalPrice.toFixed(2)}</p>
-            <p><strong>Status:</strong> processing</p>
+            <p><strong>Status:</strong> {order.status || "Pending"}</p>
             <p><strong>Payment:</strong> paid</p>
             <p><strong>Shipping Address:</strong> {`${address.address}, ${address.city}, ${address.postalCode}, ${address.country}`}</p>
           </div>
